@@ -1,36 +1,211 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+🌍 Custom Internationalization (i18n) in Next.js
 
-## Getting Started
+A lightweight, dependency-free approach to implementing multilingual support (English 🇬🇧 + French 🇫🇷) in a Next.js App Router project.
 
-First, run the development server:
+🚀 Features
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+🌐 Detects user language using Accept-Language header
+🔀 Auto-redirects users to /en or /fr
+📚 JSON-based dictionaries
+🧩 Fully dynamic: works with all pages under [lang]
+🎛️ Includes a dropdown language switcher
+🪶 No opinionated frameworks (unlike next-intl)
+
+📦 Installation
+```
+npm install @formatjs/intl-localematcher
+npm install negotiator
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+📁 Project Structure
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+app/
+ └── [lang]/
+     ├── layout.tsx
+     ├── page.tsx
+     └── dictionaries/
+          ├── dictionaries.ts
+          ├── en.json
+          └── fr.json
+     └── components/
+          └── LanguageSwitcher.tsx
+proxy.ts
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+🧠 Step 1 — Create Proxy for Language Detection
+proxy.ts
 
-## Learn More
+```
+import { match } from "@formatjs/intl-localematcher";
+import Negotiator from "negotiator";
+import { NextRequest } from "next/server";
 
-To learn more about Next.js, take a look at the following resources:
+let locales = ["en", "fr"];
+let defaultLocale = "en";
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+function getLocale(request: NextRequest) {
+  const acceptedLanguage = request.headers.get("accept-language") ?? undefined;
+  const headers: Record<string, string | string[] | undefined> = {
+    "accept-language": acceptedLanguage,
+  };
+  const languages = new Negotiator({ headers }).languages();
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+  const locale = match(languages, locales, defaultLocale); // -> 'en-US'
+  return locale;
+}
+export function proxy(request: NextRequest) {
+  // Check if there is any supported locale in the pathname
+  const { pathname } = request.nextUrl;
+  const pathnameHasLocale = locales.some(
+    (locale) => pathname.startsWith(`/${locale}/`) || pathname === `/${locale}`
+  );
 
-## Deploy on Vercel
+  if (pathnameHasLocale) return;
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+  const locale = getLocale(request);
+  request.nextUrl.pathname = `/${locale}${pathname}`;
+  // e.g. incoming request is /products
+  // The new URL is now /en-US/products
+  return Response.redirect(request.nextUrl);
+}
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+export const config = {
+  matcher: [
+    // Skip all internal paths (_next)
+    "/((?!api|assets|.*\\..*|_next).*)",
+    // Optional: only run on root (/) URL
+    // '/'
+  ],
+};
+
+```
+
+🧠 Step 2 — Create Dictionaries
+app/[lang]/dictionaries/dictionaries.ts
+
+```
+import "server-only";
+
+type Locale = "en" | "fr";
+
+const dictionaries: Record<Locale, () => Promise<any>> = {
+  en: () => import("./en.json").then((module) => module.default),
+  fr: () => import("./fr.json").then((module) => module.default),
+};
+
+export async function getDictionary(locale: Locale) {
+  return dictionaries[locale]();
+}
+```
+
+en.json
+```
+{
+  "home": {
+    "title": "Welcome to Our Website",
+    "description": "This is a simple example demonstrating internationalization in Next.js."
+  }
+}
+```
+fr.json
+```
+{
+  "home": {
+    "title": "Bienvenue sur notre site Web",
+    "description": "Ceci est un exemple simple démontrant l’internationalisation dans Next.js."
+  }
+}
+```
+
+
+🌐 Step 3 — Add the Dropdown Lang Switcher
+components/LanguageSwitcher.tsx
+```
+"use client";
+
+import { usePathname, useRouter } from "next/navigation";
+
+export default function LanguageSwitcher({
+  currentLang,
+}: {
+  currentLang: "en" | "fr";
+}) {
+  const pathname = usePathname();
+  const router = useRouter();
+
+  const handleChange = (newLang: string) => {
+    // Replace /en or /fr at the start of the path
+    const updatedPath = pathname.replace(/^\/(en|fr)/, `/${newLang}`);
+    router.push(updatedPath);
+  };
+
+  return (
+    <select
+      value={currentLang}
+      onChange={(e) => handleChange(e.target.value)}
+      style={{
+        padding: "6px 10px",
+        borderRadius: "6px",
+        border: "1px solid #ccc",
+        cursor: "pointer",
+      }}
+    >
+      <option value="en">English</option>
+      <option value="fr">French</option>
+    </select>
+  );
+}
+```
+
+🧠 Step 4 — Use Dictionary in Pages
+app/[lang]/page.tsx
+```
+import LanguageSwitcher from "./components/LanguageSwitcher";
+import { getDictionary } from "./dictionaries/dictionaries";
+
+export default async function Home({
+  params,
+}: {
+  params: Promise<{ lang: "en" | "fr" }>;
+}) {
+    const { lang } = await params; 
+  const dict = await getDictionary(lang);
+
+  return (
+    <main>
+      <LanguageSwitcher currentLang={lang}/>
+      <h1>{dict.home.title}</h1>
+      <p>{dict.home.description}</p>
+    </main>
+  );
+}
+
+```
+
+🎉 Conclusion
+
+With this setup you now have:
+
+✨ Custom multilingual support
+✨ Automatic language detection
+✨ Fully dynamic routing using [lang]
+✨ Optional dictionary expansion
+✨ Works in both static and server-rendered pages
+
+## 📄 License
+
+This project is licensed under the MIT License.
+
+## 🤝 Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+## 📧 Support
+
+For support, please open an issue in the repository or contact the development team.
+
+<div align="center">
+Built with ❤️ for the Next JS
+
+⭐ Star this repo if you found it helpful!
+
+</div>
