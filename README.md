@@ -18,7 +18,7 @@ npm install negotiator
 ```
 
 📁 Project Structure
-
+```
 app/
  └── [lang]/
      ├── layout.tsx
@@ -30,6 +30,8 @@ app/
      └── components/
           └── LanguageSwitcher.tsx
 proxy.ts
+
+```
 
 🧠 Step 1 — Create Proxy for Language Detection
 proxy.ts
