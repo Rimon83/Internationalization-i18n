@@ -4,12 +4,12 @@ A lightweight, dependency-free approach to implementing multilingual support (En
 
 🚀 Features
 
-🌐 Detects user language using Accept-Language header
-🔀 Auto-redirects users to /en or /fr
-📚 JSON-based dictionaries
-🧩 Fully dynamic: works with all pages under [lang]
-🎛️ Includes a dropdown language switcher
-🪶 No opinionated frameworks (unlike next-intl)
+# 🌐 Detects user language using Accept-Language header
+# 🔀 Auto-redirects users to /en or /fr
+# 📚 JSON-based dictionaries
+# 🧩 Fully dynamic: works with all pages under [lang]
+# 🎛️ Includes a dropdown language switcher
+# 🪶 No opinionated frameworks (unlike next-intl)
 
 ![English About page](/public/images/about-en.png)
 ![French About page](/public/images/about-fr.png)
@@ -190,11 +190,11 @@ export default async function Home({
 
 With this setup you now have:
 
-✨ Custom multilingual support
-✨ Automatic language detection
-✨ Fully dynamic routing using [lang]
-✨ Optional dictionary expansion
-✨ Works in both static and server-rendered pages
+# ✨ Custom multilingual support
+# ✨ Automatic language detection
+# ✨ Fully dynamic routing using [lang]
+# ✨ Optional dictionary expansion
+# ✨ Works in both static and server-rendered pages
 
 ## 📄 License
 
