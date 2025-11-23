@@ -2,5 +2,9 @@
   "home": {
     "title": "Bienvenue sur notre site Web",
     "description": "Ceci est une application Next.js multilingue simple qui montre comment prendre en charge plusieurs langues comme l'anglais et le français."
+  },
+  "about": {
+    "title": "À propos de nous",
+    "description": "Nous nous engageons à fournir le meilleur service à nos clients dans le monde entier."
   }
 }

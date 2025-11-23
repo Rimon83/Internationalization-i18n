@@ -2,5 +2,9 @@
   "home": {
     "title": "Welcome to Our Website",
     "description": "This is a simple multilingual Next.js application demonstrating how to support multiple languages like English and French."
+  },
+  "about": {
+    "title": "About Us",
+    "description": "We are committed to providing the best service to our customers worldwide."
   }
 }

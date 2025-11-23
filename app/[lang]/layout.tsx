@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 // @ts-ignore
 import "./globals.css";
+import LanguageSwitcher from "./components/LanguageSwitcher";
+import Image from "next/image";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -19,17 +21,27 @@ export const metadata: Metadata = {
 };
   
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
+  params,
 }: Readonly<{
   children: React.ReactNode;
-  
+  params: Promise<{ lang: "en" | "fr" }>;
 }>) {
+  const { lang } = await params; 
   return (
     <html lang="en">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
+       <header className='flex justify-between items-center p-4 bg-slate-200 '> 
+        <Image src="/images/logo.png" alt="Logo" width={50} height={50} />
+        <nav>
+          <a href={`/${lang}`} className="mx-2">Home</a>
+          <a href={`/${lang}/about`} className="mx-2">About</a>
+        </nav>
+        <LanguageSwitcher currentLang={lang} />
+        </header>
         {children}
       </body>
     </html>

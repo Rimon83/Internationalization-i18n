@@ -1,4 +1,3 @@
-import LanguageSwitcher from "./components/LanguageSwitcher";
 import { getDictionary } from "./dictionaries/dictionaries";
 
 export default async function Home({
@@ -10,8 +9,8 @@ export default async function Home({
   const dict = await getDictionary(lang);
 
   return (
-    <main>
-      <LanguageSwitcher currentLang={lang}/>
+    <main className="p-8 bg-gray-100 h-screen">
+      
       <h1>{dict.home.title}</h1>
       <p>{dict.home.description}</p>
     </main>

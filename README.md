@@ -11,6 +11,9 @@ A lightweight, dependency-free approach to implementing multilingual support (En
 🎛️ Includes a dropdown language switcher
 🪶 No opinionated frameworks (unlike next-intl)
 
+![English About page](/public/images/about-en.png)
+![French About page](/public/images/about-fr.png)
+
 📦 Installation
 ```
 npm install @formatjs/intl-localematcher
